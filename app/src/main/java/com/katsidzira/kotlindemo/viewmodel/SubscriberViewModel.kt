@@ -2,9 +2,11 @@ package com.katsidzira.kotlindemo.viewmodel
 
 import androidx.databinding.Bindable
 import androidx.databinding.Observable
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.katsidzira.kotlindemo.Event
 import com.katsidzira.kotlindemo.database.Subscriber
 import com.katsidzira.kotlindemo.repository.SubscriberRepository
 import kotlinx.coroutines.launch
@@ -27,6 +29,10 @@ class SubscriberViewModel(private val repository: SubscriberRepository) : ViewMo
     @Bindable
     val clearAllOrDeleteButtonText = MutableLiveData<String>()
 
+    private val statusMessage = MutableLiveData<Event<String>>()
+    val message : LiveData<Event<String>>
+        get() = statusMessage
+
     init {
         saveOrUpdateButtonText.value = "Save"
         clearAllOrDeleteButtonText.value = "Clear all"
@@ -34,20 +40,24 @@ class SubscriberViewModel(private val repository: SubscriberRepository) : ViewMo
 
     fun insert(subscriber: Subscriber) = viewModelScope.launch {
         repository.insert(subscriber)
-        resetViews()
+        statusMessage.value = Event("subscriber inserted successfully")
     }
 
     fun update(subscriber: Subscriber) = viewModelScope.launch {
         repository.update(subscriber)
+        resetViews()
+        statusMessage.value = Event("subscriber updated successfully")
     }
 
     fun delete(subscriber: Subscriber) = viewModelScope.launch {
         repository.delete(subscriber)
         resetViews()
+        statusMessage.value = Event("subscriber deleted successfully")
     }
 
     fun clearAll() = viewModelScope.launch {
         repository.deleteAll()
+        statusMessage.value = Event("all subscribers deleted successfully")
     }
 
     fun changeViewForSubscriber(subscriber: Subscriber) {
