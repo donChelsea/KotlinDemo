@@ -3,11 +3,13 @@ package com.katsidzira.kotlindemo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.katsidzira.kotlindemo.adapter.SubscriberAdapter
+import com.katsidzira.kotlindemo.database.Subscriber
 import com.katsidzira.kotlindemo.database.SubscriberDatabase
 import com.katsidzira.kotlindemo.databinding.ActivityMainBinding
 import com.katsidzira.kotlindemo.repository.SubscriberRepository
@@ -40,11 +42,15 @@ class MainActivity : AppCompatActivity() {
         displaySubscribersList()
     }
 
-    // observe subscribers list
+    // observe subscribers list and give to adapter with clicklistener for items in viewholder
     private fun displaySubscribersList() {
         subscriberViewModel.subscribers.observe(this, Observer {
             Log.d("main activity", it.toString())
-            binding.subscriberRecyclerview.adapter = SubscriberAdapter(it.reversed())
+            binding.subscriberRecyclerview.adapter = SubscriberAdapter(it.reversed(), {selectedItem: Subscriber -> listItemClicked(selectedItem)})
         })
+    }
+
+    private fun listItemClicked(subscriber: Subscriber) {
+        Toast.makeText(this, "selected name is ${subscriber.name}", Toast.LENGTH_SHORT).show()
     }
 }

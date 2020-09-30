@@ -9,7 +9,10 @@ import com.katsidzira.kotlindemo.R
 import com.katsidzira.kotlindemo.database.Subscriber
 import com.katsidzira.kotlindemo.databinding.SubscriberItemViewBinding
 
-class SubscriberAdapter(private val subscribers: List<Subscriber>) : RecyclerView.Adapter<SubscriberViewHolder>() {
+class SubscriberAdapter(
+    private val subscribers: List<Subscriber>,
+    private val clickListener: (Subscriber) -> Unit
+) : RecyclerView.Adapter<SubscriberViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubscriberViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -22,17 +25,17 @@ class SubscriberAdapter(private val subscribers: List<Subscriber>) : RecyclerVie
     }
 
     override fun onBindViewHolder(holder: SubscriberViewHolder, position: Int) {
-        holder.bind(subscribers[position])
-        Log.d("adapter: name: ", subscribers[position].name)
+        holder.bind(subscribers[position], clickListener)
     }
 }
 
 class SubscriberViewHolder(val binding: SubscriberItemViewBinding) : RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(subscriber: Subscriber) {
+    fun bind(subscriber: Subscriber, clickListener: (Subscriber) -> Unit) {
         binding.textviewName.text = subscriber.name
         binding.textviewEmail.text = subscriber.email
-        Log.d("viewholder: name: ", subscriber.name)
-
+        binding.layoutListItem.setOnClickListener {
+            clickListener(subscriber)
+        }
     }
 }
