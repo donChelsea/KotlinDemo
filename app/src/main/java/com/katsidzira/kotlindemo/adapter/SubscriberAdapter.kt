@@ -1,6 +1,5 @@
 package com.katsidzira.kotlindemo.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -9,10 +8,10 @@ import com.katsidzira.kotlindemo.R
 import com.katsidzira.kotlindemo.database.Subscriber
 import com.katsidzira.kotlindemo.databinding.SubscriberItemViewBinding
 
-class SubscriberAdapter(
-    private val subscribers: List<Subscriber>,
-    private val clickListener: (Subscriber) -> Unit
+class SubscriberAdapter(private val clickListener: (Subscriber) -> Unit
 ) : RecyclerView.Adapter<SubscriberViewHolder>() {
+
+    private val subscribersList = ArrayList<Subscriber>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubscriberViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -21,11 +20,17 @@ class SubscriberAdapter(
     }
 
     override fun getItemCount(): Int {
-        return subscribers.size
+        return subscribersList.size
     }
 
     override fun onBindViewHolder(holder: SubscriberViewHolder, position: Int) {
-        holder.bind(subscribers[position], clickListener)
+        subscribersList.reverse()
+        holder.bind(subscribersList[position], clickListener)
+    }
+
+    fun setList(subscribers: List<Subscriber>) {
+        subscribersList.clear()
+        subscribersList.addAll(subscribers)
     }
 }
 

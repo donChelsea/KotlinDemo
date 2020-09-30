@@ -1,12 +1,13 @@
 package com.katsidzira.kotlindemo.viewmodel
 
+import android.util.Patterns
 import androidx.databinding.Bindable
 import androidx.databinding.Observable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.katsidzira.kotlindemo.Event
+import com.katsidzira.kotlindemo.event.Event
 import com.katsidzira.kotlindemo.database.Subscriber
 import com.katsidzira.kotlindemo.repository.SubscriberRepository
 import kotlinx.coroutines.launch
@@ -19,18 +20,15 @@ class SubscriberViewModel(private val repository: SubscriberRepository) : ViewMo
 
     @Bindable
     val inputName = MutableLiveData<String>()
-
     @Bindable
     val inputEmail = MutableLiveData<String>()
-
     @Bindable
     val saveOrUpdateButtonText = MutableLiveData<String>()
-
     @Bindable
     val clearAllOrDeleteButtonText = MutableLiveData<String>()
 
     private val statusMessage = MutableLiveData<Event<String>>()
-    val message : LiveData<Event<String>>
+    val message: LiveData<Event<String>>
         get() = statusMessage
 
     init {
@@ -39,25 +37,47 @@ class SubscriberViewModel(private val repository: SubscriberRepository) : ViewMo
     }
 
     fun insert(subscriber: Subscriber) = viewModelScope.launch {
-        repository.insert(subscriber)
-        statusMessage.value = Event("subscriber inserted successfully")
+        val newRowId: Long = repository.insert(subscriber)
+        if (newRowId > -1) {
+            statusMessage.value =
+                Event("subscriber #${newRowId} inserted successfully")
+        } else {
+            statusMessage.value = Event("Error")
+        }
     }
 
     fun update(subscriber: Subscriber) = viewModelScope.launch {
-        repository.update(subscriber)
-        resetViews()
-        statusMessage.value = Event("subscriber updated successfully")
+        val noOfRows: Int = repository.update(subscriber)
+        if (noOfRows > 0) {
+            resetViews()
+            statusMessage.value = Event("$noOfRows subscriber updated successfully")
+        } else {
+            statusMessage.value = Event("Error")
+        }
     }
 
     fun delete(subscriber: Subscriber) = viewModelScope.launch {
-        repository.delete(subscriber)
-        resetViews()
-        statusMessage.value = Event("subscriber deleted successfully")
+        val noOfRowsDeleted: Int = repository.delete(subscriber)
+        if (noOfRowsDeleted > 0) {
+            resetViews()
+            statusMessage.value =
+                Event("$noOfRowsDeleted subscriber deleted successfully")
+        } else {
+            statusMessage.value =
+                Event("Error")
+        }
+
     }
 
     fun clearAll() = viewModelScope.launch {
-        repository.deleteAll()
-        statusMessage.value = Event("all subscribers deleted successfully")
+        val noOfRowsDeleted: Int = repository.deleteAll()
+        if (noOfRowsDeleted > 0) {
+            statusMessage.value =
+                Event("$noOfRowsDeleted subscribers deleted successfully")
+        } else {
+            statusMessage.value =
+                Event("Error")
+        }
     }
 
     fun changeViewForSubscriber(subscriber: Subscriber) {
@@ -73,19 +93,30 @@ class SubscriberViewModel(private val repository: SubscriberRepository) : ViewMo
     }
 
     fun saveOrUpdate() {
-        if (isUpdateOrDelete) {
-            subscriberToUpdateOrDelete.name = inputName.value!!
-            subscriberToUpdateOrDelete.email = inputEmail.value!!
-
-            update(subscriberToUpdateOrDelete)
+        if (inputName.value == null || inputName.value == "") {
+            statusMessage.value =
+                Event("Please enter subscriber's name")
+        } else if (inputEmail.value == null) {
+            statusMessage.value =
+                Event("Please enter subscriber's email")
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(inputEmail.value!!).matches()) {
+            statusMessage.value =
+                Event("Please enter a valid email address")
         } else {
-            val name = inputName.value!!
-            val email = inputEmail.value!!
+            if (isUpdateOrDelete) {
+                subscriberToUpdateOrDelete.name = inputName.value!!
+                subscriberToUpdateOrDelete.email = inputEmail.value!!
 
-            insert(Subscriber(0, name, email))
+                update(subscriberToUpdateOrDelete)
+            } else {
+                val name = inputName.value!!
+                val email = inputEmail.value!!
 
-            inputName.value = null
-            inputEmail.value = null
+                insert(Subscriber(0, name, email))
+
+                inputName.value = null
+                inputEmail.value = null
+            }
         }
     }
 

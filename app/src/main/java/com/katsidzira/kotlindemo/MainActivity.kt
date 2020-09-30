@@ -19,11 +19,11 @@ import com.katsidzira.kotlindemo.viewmodel.SubscriberViewModelFactory
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var subscriberViewModel: SubscriberViewModel
+    private lateinit var adapter: SubscriberAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-
         val dao = SubscriberDatabase.getInstance(application).subscriberDAO
         val repository = SubscriberRepository(dao)
         val factory = SubscriberViewModelFactory(repository)
@@ -46,6 +46,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun initRecyclerView() {
         binding.subscriberRecyclerview.layoutManager = LinearLayoutManager(this)
+        adapter = SubscriberAdapter { selectedItem: Subscriber -> listItemClicked(selectedItem) }
+        binding.subscriberRecyclerview.adapter = adapter
 
         displaySubscribersList()
     }
@@ -54,7 +56,8 @@ class MainActivity : AppCompatActivity() {
     private fun displaySubscribersList() {
         subscriberViewModel.subscribers.observe(this, Observer {
             Log.d("main activity", it.toString())
-            binding.subscriberRecyclerview.adapter = SubscriberAdapter(it.reversed(), {selectedItem: Subscriber -> listItemClicked(selectedItem)})
+            adapter.setList(it.reversed())
+            adapter.notifyDataSetChanged()
         })
     }
 

@@ -1,4 +1,4 @@
-package com.katsidzira.kotlindemo
+package com.katsidzira.kotlindemo.event
 
 // standard code
 
