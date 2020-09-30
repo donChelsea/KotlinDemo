@@ -6,6 +6,8 @@ import android.util.Log
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.katsidzira.kotlindemo.adapter.SubscriberAdapter
 import com.katsidzira.kotlindemo.database.SubscriberDatabase
 import com.katsidzira.kotlindemo.databinding.ActivityMainBinding
 import com.katsidzira.kotlindemo.repository.SubscriberRepository
@@ -29,6 +31,12 @@ class MainActivity : AppCompatActivity() {
         binding.viewModel = subscriberViewModel
         binding.lifecycleOwner = this
 
+        initRecyclerView()
+    }
+
+    private fun initRecyclerView() {
+        binding.subscriberRecyclerview.layoutManager = LinearLayoutManager(this)
+
         displaySubscribersList()
     }
 
@@ -36,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     private fun displaySubscribersList() {
         subscriberViewModel.subscribers.observe(this, Observer {
             Log.d("main activity", it.toString())
+            binding.subscriberRecyclerview.adapter = SubscriberAdapter(it.reversed())
         })
     }
 }
